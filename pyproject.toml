@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cedarverse-bda"
+dynamic = ["version"]
+description = "Interactive dashboard tool for analyzing differences between Aider benchmark runs"
+authors = [{ name = "Elifarley", email = "elifarley@cedarverse.com" }]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["benchmark", "testing", "analysis", "visualization", "dashboard", "comparison", "aider"]
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "dash>=2.18.2",
+    "pandas>=2.2.2",
+    "statsmodels>=0.14.2"
+]
+requires-python = ">=3.12"
+
+[project.urls]
+Homepage = "https://github.com/cedarverse/benchmark-delta-analysis"
+Documentation = "https://github.com/cedarverse/benchmark-delta-analysis#readme"
+Repository = "https://github.com/cedarverse/benchmark-delta-analysis.git"
+"Bug Tracker" = "https://github.com/cedarverse/benchmark-delta-analysis/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=22.0",
+    "isort>=5.0",
+    "flake8>=4.0",
+    "mypy>=0.900",
+    "coverage>=6.0",
+    "tox>=3.24",
+]
+
+[project.scripts]
+bda = "cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools_scm]
+# To override version:
+# >>> SETUPTOOLS_SCM_PRETEND_VERSION=0.0.2 python -m build
+# To dry-run and see version:
+# >>> python -m setuptools_scm
+write_to = "src/version/_version.py"
+# Append .post{number of commits} to your version if there are commits after the last tag.
+version_scheme = "post-release"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["version", "bda*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+"bda" = [
+    "cedarverse/bda/*.css",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

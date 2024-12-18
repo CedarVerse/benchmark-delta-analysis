@@ -6,7 +6,7 @@ all: ci build version
 dist d: all
 	scripts/check-version.sh
 	# Win MSYS2 support: force config file location
-	twine upload $$(test -e ~/.pypirc && echo '--config-file ~/.pypirc') dist/*
+	twine upload --verbose $$(test -e ~/.pypirc && echo '--config-file ~/.pypirc') dist/*
 
 clean c:
 	rm -rfv out dist build/bdist.* src/*.egg-info
@@ -20,7 +20,7 @@ install i:
 	&& pip show cedarverse-bda
 
 test t:
-	echo TODO pytest --cov=src/cedarscript_integration_aider tests/ --cov-report term-missing
+	echo TODO pytest --cov=src/bda tests/ --cov-report term-missing
 
 build b:
 	# SETUPTOOLS_SCM_PRETEND_VERSION=0.0.1

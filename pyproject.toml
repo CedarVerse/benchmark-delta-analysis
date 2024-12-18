@@ -44,6 +44,8 @@ dev = [
     "mypy>=0.900",
     "coverage>=6.0",
     "tox>=3.24",
+    "build>=1.2.2",
+    "setuptools-scm>=8.1.0",
 ]
 
 [project.scripts]
@@ -63,12 +65,12 @@ version_scheme = "post-release"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["version", "bda*"]
+include = ["cli", "version", "util", "bda*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-"bda" = [
-    "cedarverse/bda/*.css",
+"bda.assets" = [
+    "*.css",
 ]
 
 [tool.black]

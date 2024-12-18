@@ -8,6 +8,7 @@ import os
 import subprocess
 from collections import Counter
 from functools import total_ordering
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import NamedTuple, Union
 
@@ -67,25 +68,25 @@ class StatusPrinter:
         print(f"{indent}{prefix}: {count:3d} ({current_percent:3.0f}%){_get_visual_indicator(current_percent)}{suffix}")
 
 
-def main(benchmark_1: str, benchmark_2: str):
+def main(run1path: Traversable, run2path: Traversable):
     """
     Main function to compare two benchmark runs and print the analysis.
 
     Args:
-    benchmark_dir_1 (str): Path to the first benchmark run.
-    benchmark_dir_2 (str): Path to the second benchmark run.
+    benchmark1 (Traversable): Path to the first benchmark run.
+    benchmark2 (Traversable): Path to the second benchmark run.
 
     This function parses both benchmark runs, compares them, and prints a detailed analysis
     of how tests have changed between the two runs. It categorizes tests as improved,
     worsened, stable, or present in only one run, and provides a summary count for each category and sub-category.
     """
-    print(f"--- {benchmark_1.name}")
-    print(f"+++ {benchmark_2.name}")
+    print(f"--- {run1path.name}")
+    print(f"+++ {run2path.name}")
     print("# ============= Failed Attempts per Test =============")
     print("# N >= 0: It eventually passed after N failed attempts")
     print("# N < 0 : All attempts failed and the limit was reached")
-    benchmark_run_1 = {t.name: t for t in parse_benchmark_source(benchmark_1)}
-    benchmark_run_2 = {t.name: t for t in parse_benchmark_source(benchmark_2)}
+    benchmark_run_1 = {t.name: t for t in parse_benchmark_source(run1path)}
+    benchmark_run_2 = {t.name: t for t in parse_benchmark_source(run2path)}
 
     (
         test_names_only_1, test_names_only_2, test_names_improved, test_names_worsened, test_names_stable
@@ -162,8 +163,8 @@ def main(benchmark_1: str, benchmark_2: str):
         print_test_line('=-', test_names_stable_failed, benchmark_run_1, benchmark_run_2)
 
     print()
-    print(f"--- {benchmark_1.name}")
-    print(f"+++ {benchmark_2.name}")
+    print(f"--- {run1path.name}")
+    print(f"+++ {run2path.name}")
     printer = StatusPrinter(len(benchmark_run_2))
     printer(
         "@@ NPNF-Delta ",
@@ -438,17 +439,17 @@ def _get_attempt_limit_and_normalized_counts(benchmark_run: dict[str, AiderTestR
     return abs(negative_value), result
 
 
-def parse_benchmark_source(benchmark_dir: Path) -> list[AiderTestResult]:
+def parse_benchmark_source(benchmark_path: Traversable) -> list[AiderTestResult]:
     """
     Parse a benchmark run dir and extract test results.
 
     Args:
-    benchmark_dir (str): Path to the benchmark run dir.
+    benchmark_dir (Traversable): Path to the benchmark run dir.
 
     Returns:
     List[AiderTestResult]: A list of test results
     """
-    with BenchmarkAnalyzer(benchmark_dir) as analyzer:
+    with BenchmarkAnalyzer(benchmark_path) as analyzer:
         benchmark_results = analyzer.analyze(print_output=False)
 
     results = []
@@ -532,21 +533,21 @@ if __name__ == "__main__":
 
     match len(sys.argv):
         case 3:
-            benchmark_1 = sys.argv[1]
-            benchmark_2 = sys.argv[2]
+            benchmark1 = sys.argv[1]
+            benchmark2 = sys.argv[2]
         case 2:
-            benchmark_1 = 'perfect'
-            benchmark_2 = sys.argv[1]
+            benchmark1 = 'perfect'
+            benchmark2 = sys.argv[1]
         case 1:
-            benchmark_1 = os.getenv('benchmark_1')
-            benchmark_2 = os.getenv('benchmark_2')
-            if not benchmark_2:
-                benchmark_2 = benchmark_1
-                benchmark_1 = 'perfect'
+            benchmark1 = os.getenv('benchmark1')
+            benchmark2 = os.getenv('benchmark2')
+            if not benchmark2:
+                benchmark2 = benchmark1
+                benchmark1 = 'perfect'
 
-    if not benchmark_1 or not benchmark_2:
+    if not benchmark1 or not benchmark2:
         print(f"Usage: {sys.argv[0]} [benchmark-root-1] [benchmark-root-2]")
-        print(f"Usage: benchmark_1='<benchmark-root-1>' benchmark_2='<benchmark-root-2>' {sys.argv[0]}")
+        print(f"Usage: benchmark1='<benchmark-root-1>' benchmark2='<benchmark-root-2>' {sys.argv[0]}")
         sys.exit(1)
 
-    main(benchmark_1, benchmark_2)
+    main(benchmark1, benchmark2)

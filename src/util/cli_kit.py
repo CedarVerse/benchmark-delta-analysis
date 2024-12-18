@@ -17,8 +17,8 @@ def get_benchmark_args(parser):
         case 1:
             b1, b2 = 'perfect', args.benchmarks[0]
         case 0:
-            b1 = os.getenv('benchmark_1')
-            b2 = os.getenv('benchmark_2')
+            b1 = os.getenv('benchmark1')
+            b2 = os.getenv('benchmark2')
             if not b2:
                 b2 = b1
                 b1 = 'perfect'

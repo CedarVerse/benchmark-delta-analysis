@@ -5,9 +5,12 @@ import shutil
 import sys
 from datetime import datetime, timedelta
 import re
+from importlib.resources.abc import Traversable
 from os import getenv
 from pathlib import Path
 from dataclasses import dataclass
+
+from bda.file_kit import find_files, find_aider_results
 from dotenv import load_dotenv
 import tarfile
 import tempfile
@@ -53,7 +56,7 @@ def archive2dir(archive_path: Path) -> Path:
 
 
 class BenchmarkAnalyzer:
-    def __init__(self, benchmark_run_path: Path):
+    def __init__(self, benchmark_run_path: Traversable):
         load_dotenv(verbose=True)
         self.must_delete_benchmark_dir = False
         self.is_perfect_run = str(benchmark_run_path) == 'perfect'
@@ -61,7 +64,11 @@ class BenchmarkAnalyzer:
             return
 
         self.benchmark_run_path = benchmark_run_path
-        benchmark_root = getenv('benchmark_root') if not self.benchmark_run_path.is_absolute() else None
+        match self.benchmark_run_path:
+            case Path() as path if not path.is_absolute():
+                benchmark_root = getenv('benchmark_root')
+            case _: benchmark_root = None
+
         if benchmark_root:
             benchmark_root = Path(benchmark_root)
             if not benchmark_root.is_absolute():
@@ -69,7 +76,7 @@ class BenchmarkAnalyzer:
 
             self.benchmark_run_path = benchmark_root / self.benchmark_run_path
 
-        if not self.benchmark_run_path.exists():
+        if isinstance(self.benchmark_run_path, Path) and not self.benchmark_run_path.exists():
             raise FileNotFoundError(f"Benchmark not found: {self.benchmark_run_path}")
 
     def __enter__(self) -> 'BenchmarkAnalyzer':
@@ -224,7 +231,7 @@ class BenchmarkAnalyzer:
                   'model, edit_format, cost, test_timeouts, num_error_outputs, num_user_asks, num_exhausted_context_windows, '
                   'num_malformed_responses, syntax_errors, indentation_errors, lazy_comments, cedarscript_errors')
 
-        for aider_json_file in sorted(self.benchmark_run_path.rglob('.aider.results.json')):
+        for aider_json_file in find_aider_results(self.benchmark_run_path):
             i += 1
             test_folder: Path = aider_json_file.parent
             chat_history_file: Path = (test_folder / '.aider.chat.history.md').absolute()

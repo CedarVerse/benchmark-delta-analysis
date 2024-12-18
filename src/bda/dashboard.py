@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from collections import defaultdict
 
@@ -18,10 +19,10 @@ from .benchmark_analyzer import BenchmarkAnalyzer
 
 app = Dash(__name__)
 
-def create_dashboard(benchmark_1: str, benchmark_2: str, port: int = 8080):
+def create_dashboard(benchmark1: Traversable, benchmark2: Traversable, port: int = 8080):
     # Parse benchmark data
-    benchmark_run_1 = {t.name: t for t in parse_benchmark_source(benchmark_1)}
-    benchmark_run_2 = {t.name: t for t in parse_benchmark_source(benchmark_2)}
+    benchmark_run_1 = {t.name: t for t in parse_benchmark_source(benchmark1)}
+    benchmark_run_2 = {t.name: t for t in parse_benchmark_source(benchmark2)}
 
     # Get comparison results
     only_1, only_2, improved, worsened, stable = compare_benchmark_runs(
@@ -39,12 +40,12 @@ def create_dashboard(benchmark_1: str, benchmark_2: str, port: int = 8080):
             html.Div([
                 html.Div([
                     html.H3('Baseline'),
-                    html.P(f"Path: {benchmark_1}"),
+                    html.P(f"Path: {benchmark1}"),
                     html.P(f"Tests: {len(benchmark_run_1)}"),
                 ], className='info-box'),
                 html.Div([
                     html.H3('Current'),
-                    html.P(f"Path: {benchmark_2}"),
+                    html.P(f"Path: {benchmark2}"),
                     html.P(f"Tests: {len(benchmark_run_2)}"),
                 ], className='info-box'),
             ], className='info-container')
@@ -487,22 +488,24 @@ if __name__ == '__main__':
 
     match len(sys.argv):
         case 3:
-            benchmark_1 = sys.argv[1]
-            benchmark_2 = sys.argv[2]
+            benchmark1 = Path(sys.argv[1])
+            benchmark2 = Path(sys.argv[2])
         case 2:
-            benchmark_1 = 'perfect'
-            benchmark_2 = sys.argv[1]
+            benchmark1 = 'perfect'
+            benchmark2 = Path(sys.argv[1])
         case 1:
-            benchmark_1 = os.getenv('benchmark_1')
-            benchmark_2 = os.getenv('benchmark_2')
-            if not benchmark_2:
-                benchmark_2 = benchmark_1
-                benchmark_1 = 'perfect'
+            benchmark1 = Path(os.getenv('benchmark1'))
+            benchmark2 = os.getenv('benchmark2')
+            if not benchmark2:
+                benchmark2 = benchmark1
+                benchmark1 = 'perfect'
+            else:
+                benchmark2 = Path(benchmark2)
 
-    if not benchmark_1 or not benchmark_2:
-        print(f"Usage: {sys.argv[0]} [benchmark-root-1] [benchmark-root-2]")
-        print(f"Usage: benchmark_1='<benchmark-root-1>' benchmark_2='<benchmark-root-2>' {sys.argv[0]}")
+    if not benchmark1 or not benchmark2:
+        print(f"Usage: bda [benchmark-root-1] [benchmark-root-2]")
+        print(f"Usage: benchmark1='<benchmark-root-1>' benchmark2='<benchmark-root-2>' bda")
         sys.exit(1)
 
-    create_dashboard(benchmark_1, benchmark_2)
+    create_dashboard(benchmark1, benchmark2)
     app.run(debug=True)

@@ -2,6 +2,11 @@
 
 A Python tool for analyzing and visualizing differences between two Aider benchmark runs through an interactive dashboard.
 
+[![PyPI version](https://badge.fury.io/py/cedarverse-bda.svg)](https://pypi.org/project/cedarverse-bda)
+[![Python Versions](https://img.shields.io/pypi/pyversions/cedarverse-bda.svg)](https://pypi.org/project/cedarverse-bda/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ## Features
 
 - Compares two benchmark run folders (raw or tar-bz2 archives)

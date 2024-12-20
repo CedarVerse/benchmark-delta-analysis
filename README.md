@@ -38,13 +38,13 @@ pipx install cedarverse-bda
 
 ```bash
 # Info on a single benchmark run
-bda <run-path>
+bda --info <run-path>
 
 # Delta Analysis
-bda <run1-path> <run2-path>
+bda <run1-path> [run2-path]
 
 # Interactive dashboard
-bda --dashboard <run-path>
+bda --dashboard <run1-path> [run2-path]
 
 ```
 
